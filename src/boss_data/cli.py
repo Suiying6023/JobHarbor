@@ -12,9 +12,9 @@ from .store import SourceStore
 
 
 def build_parser():
-    parser = argparse.ArgumentParser(prog="boss-data", description="JobHarbor independent BOSS source-data tool")
+    parser = argparse.ArgumentParser(prog="boss-data", description="JobHarbor BOSS job data tool")
     parser.add_argument("--config", help="Explicit YAML configuration; paths resolve against its directory")
-    parser.add_argument("--database", help="Tool-owned source SQLite (never the mixed legacy database)")
+    parser.add_argument("--database", help="Path to a JobHarbor SQLite source database")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("init", help="Create an independent source database")
     sub.add_parser("doctor", help="Read local state and cached route outcomes; sends no BOSS requests")
@@ -78,13 +78,13 @@ def build_parser():
     refresh.add_argument("--retry-after-seconds", type=float, default=60)
     refresh.add_argument("--repeat", action="store_true")
     refresh.add_argument("--max-seconds", type=float)
-    selection = sub.add_parser("select-refresh", help="Select by source status age; no network or review dependency")
+    selection = sub.add_parser("select-refresh", help="Select jobs by the age of their last valid status observation")
     selection.add_argument("--stale-hours", required=True, type=float)
     selection.add_argument("--ids", nargs="+")
     selection.add_argument("--limit", type=int, default=12)
     selection.add_argument("--include-closed", action="store_true")
     selection.add_argument("--retry-after-seconds", type=float, default=60)
-    collect = sub.add_parser("collect", help="Bounded resumable query/page/detail collection without analysis gates")
+    collect = sub.add_parser("collect", help="Collect search pages and job details as a resumable task")
     collect.add_argument("--query", action="append", required=True)
     collect.add_argument("--city", default="100010000")
     collect.add_argument("--pages", type=int, default=3)

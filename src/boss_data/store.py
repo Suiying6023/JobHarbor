@@ -1,4 +1,4 @@
-"""The tool owns source facts, version evidence, requests, and resumable tasks."""
+"""SQLite storage for source records and resumable tasks."""
 from __future__ import annotations
 
 import json
@@ -73,14 +73,14 @@ class SourceStore:
         self.path = Path(path).resolve()
         self.writable = writable
         if self.path.exists():
-            # Never open the mixed production database for writes by accident.
+            # Validate the database format before enabling writes.
             check = sqlite3.connect(self.path.as_uri() + "?mode=ro", uri=True)
             try:
                 owner = check.execute("SELECT value FROM source_meta WHERE key='owner'").fetchone()
                 if not owner or owner[0] != "JobMarketRadar":
-                    raise ValueError("Database is not a JobMarketRadar source store; use import-legacy for a mixed database")
+                    raise ValueError("Database is not a JobHarbor source store; use import-legacy to migrate it")
             except sqlite3.OperationalError as exc:
-                raise ValueError("Database is not a JobMarketRadar source store; legacy databases are read-only inputs") from exc
+                raise ValueError("Database is not a JobHarbor source store; use import-legacy to migrate it") from exc
             finally:
                 check.close()
             self.conn = sqlite3.connect(self.path, timeout=30) if writable else sqlite3.connect(

@@ -44,7 +44,7 @@ def load_json(value, default=None):
 
 
 def private_source_raw(raw):
-    """The observed legacy shapes contain platform data, not product assessment columns."""
+    """Select source payload fields for private storage."""
     if raw.get("encryptJobId") or raw.get("mobile") or raw.get("detail") or raw.get("external_source"):
         return dict(raw)
     return {key: raw[key] for key in RAW_SOURCE_KEYS if key in raw}
@@ -93,7 +93,7 @@ def activity_signals(raw, detail_fetched_at=None):
 
 
 def retain_recruiter_activity(raw, detail_fetched_at):
-    """Retain explicit source observations without importing eligibility policy."""
+    """Retain the latest observed recruiter activity."""
     signals = [s for s in activity_signals(raw, detail_fetched_at)
                if s["active_days"] is not None and parse_time(s["observed_at"])]
     if signals:

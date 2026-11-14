@@ -30,8 +30,7 @@ def doctor(settings):
                     local_listener = True
             except OSError:
                 local_listener = False
-        route = {"configured": bool(value), "egress": value.get("egress_label"), "local_proxy_listener": local_listener,
-                 "listener_proves_business_access": False}
+        route = {"configured": bool(value), "egress": value.get("egress_label"), "local_proxy_listener": local_listener}
         if name == "mobile":
             path = Path(value["session_file"]) if value.get("session_file") else None
             route["session_file_present"] = bool(path and path.is_file())
@@ -77,8 +76,7 @@ def request_stats(store, *, task_id=None, minutes=None):
             "outcomes": dict(Counter(r["outcome"] for r in rows)), "egresses": dict(Counter(r["egress"] or "unknown" for r in rows)),
             "minimum_start_gap_seconds": min(gaps) if gaps else None, "maximum_start_gap_seconds": max(gaps) if gaps else None,
             "starts": [{"started_at": r["started_at"], "kind": r["kind"], "outcome": r["outcome"], "egress": r["egress"],
-                        "http_status": r["http_status"], "business_code": r["business_code"]} for r in rows[-30:]],
-            "rate_claim": "Successful requests and body acquisitions are separate measures; a bounded sample is not a sustained rate."}
+                        "http_status": r["http_status"], "business_code": r["business_code"]} for r in rows[-30:]]}
 
 
 def duplicate_bodies(store):

@@ -1,4 +1,4 @@
-"""One-way source extraction from the intact mixed JobMarketRadar database."""
+"""Read-only import of legacy source databases."""
 from __future__ import annotations
 
 import json

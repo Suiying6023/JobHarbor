@@ -1,4 +1,4 @@
-"""Portable public source contract; private request contexts stay in the source store."""
+"""JSONL import and export for job-source/1."""
 from __future__ import annotations
 
 import json

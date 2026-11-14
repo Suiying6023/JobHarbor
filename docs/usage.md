@@ -36,7 +36,7 @@ boss-data --config config.local.yaml refresh --ids boss:example --mode authentic
 
 同文重新取得更新取得时间，变化时间保留。关闭、缓存及同任务已完成详情等跳过不占实际详情请求额度，剩余候选补足额度。不同来源 ID 保持独立。
 
-匿名使用独立无登录目录读取 SSR 状态与活跃；完整正文取得时间保持原值。判定结合 HTTP、实际 URL、岗位身份、H1、状态容器及真实验证信号。
+匿名模式使用独立无登录浏览器目录刷新状态与活跃信息，完整正文取得时间保持原值。
 
 ## 有界任务与自主循环
 
@@ -47,7 +47,7 @@ boss-data --config config.local.yaml select-refresh --stale-hours 24 --limit 12
 boss-data --config config.local.yaml loop --mode anonymous --stale-hours 24 --limit 12 --max-requests 100 --max-seconds 7200
 ```
 
-程序自动接续查询、分页和维护周期，查询重复槽位保持配置的轮转权重，真实 `has_more=false` 结束后续页。状态维护按源观察年龄选择，独立于岗位评审和个人筛选。
+程序自动接续查询、分页和维护周期，重复查询保持轮转权重，`has_more=false` 时结束后续页。状态维护按观察时间选择待刷新岗位。
 
 循环需请求/时长限制或明确 `--until-cancel`。时长从首次运行按墙钟计算，包含等待和批休；恢复保留原限制。移动默认间隔35–55秒、每批10–14次、批休360–480秒；匿名默认15–17秒、每12次批休15–19秒，均可在配置中调整。
 
@@ -104,4 +104,4 @@ with SourceStore("private/source.sqlite3") as source:
     changes = source.changes(after=0, limit=100)
 ```
 
-SourceStore 默认只读；来源写入由工具执行并核验 owner。模型分析使用来源读取接口，网络动作由 BossCli 负责。
+SourceStore 默认只读，来源写入需显式启用并核验数据库格式。BossCli 提供搜索、详情和刷新操作。

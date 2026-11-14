@@ -1,1 +1,1 @@
-"""Source protocol and response parsers; no labels or personal criteria."""
+"""Source API transport and response parsers."""

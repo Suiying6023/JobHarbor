@@ -1,4 +1,4 @@
-"""One anonymous SSR session. It writes status observations, never JD acquisitions."""
+"""Anonymous browser session for job status and activity observations."""
 from __future__ import annotations
 
 import asyncio
@@ -73,10 +73,10 @@ class AnonymousSession:
             self.context = await self.driver.chromium.launch_persistent_context(str(profile),
                 channel=self.settings.get("channel", "chrome"), headless=self.settings.get("headless", False),
                 no_viewport=True, proxy={"server": proxy.replace("socks5h://", "socks5://")} if proxy else None,
-                args=["--window-position=" + self.settings.get("window_position", "2400,1400")])
+                args=["--window-position=" + self.settings["window_position"]] if self.settings.get("window_position") else [])
             names = {c["name"] for c in await self.context.cookies(["https://www.zhipin.com/"])}
             if names.intersection({"wt", "wt2", "geek_zp_token", "zp_at", "bst"}):
-                raise ValueError("Anonymous profile contains account credentials; use the existing anonymous profile")
+                raise ValueError("Anonymous profile contains account credentials; use a separate logged-out profile")
             await self.context.route("**/*", self._route)
             self.context.on("response", self._response)
             self.context.on("requestfailed", self._failed)

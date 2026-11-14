@@ -1,4 +1,4 @@
-"""Source-only status maintenance selection; consumer/review policy is absent."""
+"""Select source records by status observation age."""
 from datetime import datetime, timezone
 
 from .contract import parse_time

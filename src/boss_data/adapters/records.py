@@ -1,4 +1,4 @@
-"""Extracted source record; product annotations are not part of this model."""
+"""Normalized job-source records."""
 from __future__ import annotations
 from datetime import datetime, timezone
 from enum import StrEnum

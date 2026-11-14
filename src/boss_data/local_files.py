@@ -1,4 +1,4 @@
-"""The existing cross-platform session lock, with no analysis dependency."""
+"""Cross-platform file locks."""
 from contextlib import contextmanager
 import os
 from pathlib import Path

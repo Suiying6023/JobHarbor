@@ -1,9 +1,7 @@
-"""BOSS Android read APIs, verified with the 14.110 application session.
+"""BOSS Android API transport and response decoding.
 
 Protocol references: the APK's net.bosszhipin.base.m / AbsBatchApiRequest and
 https://github.com/1013503897/boss-cli (9923cf4dc3b0ff29ad53465ad37dcccbfbb9689f).
-Local live search/detail captures established POST batch transport and response
-header decoding. The account session stays inside this client.
 """
 from __future__ import annotations
 
@@ -110,7 +108,7 @@ def decode_response(body: bytes, headers: Mapping[str, str], account_key: str | 
 
 
 class BossMobileClient:
-    """Use a local Android session for one Worker-selected API operation at a time."""
+    """Send serialized API requests using an Android account session."""
 
     def __init__(self, session_path: str | Path, egress: str = "direct", interval_seconds: float = 26,
                  on_started=None, on_finished=None, on_admit=None):
@@ -306,6 +304,3 @@ class BossMobileClient:
         path = "/api/zpgeek/app/brandInfo/getBrandInfo"
         payload = {"subReqs": [{"method": "GET", "path": path, "query": _query(parameters)}]}
         return self._request("POST", _BATCH_PATH, {}, account_key=None, payload=payload)
-
-    def own_expectations(self) -> dict:
-        return self._get("/api/zpgeek/cvapp/geek/baseinfo/query", {"userId": "0"})

@@ -79,10 +79,7 @@ class _Indexer(HTMLParser):
         lowered = tag.lower()
         self.stack.append((lowered, classes, values.get("id") or ""))
         if lowered in _VOID:
-            # ⚠️ 空元素（`<br/>` 最常见）**不能**走 handle_endtag：那会把当前正在收集的
-            # 那个元素的深度误当成"它结束了"，于是收集被截断。
-            # 实测代价：岗位正文用 `<br/>` 分段，第一版解析器在第一个 `<br/>` 就停，
-            # 一段 743 字的正文只取到「岗位职责：」5 个字。
+            # Void elements do not close the current text capture.
             self.stack.pop()
             return
         depth = len(self.stack)
@@ -92,13 +89,7 @@ class _Indexer(HTMLParser):
                 self._capturing.append((key, depth))
 
     def handle_startendtag(self, tag, attrs):
-        """`<br/>` 这类自闭合标签。**必须单独处理**：`HTMLParser` 的默认实现会
-        依次调用 `handle_starttag` 和 `handle_endtag`，而后者会把当前正在收集的
-        那个元素的深度当成"它结束了"，于是收集被截断。
-
-        实测代价：岗位正文用 `<br/>` 分段，第一版在第一个 `<br/>` 就停——
-        一段 743 字的正文只取到「岗位职责：」5 个字。
-        """
+        """Ignore self-closing tags without ending the surrounding text capture."""
         return None
 
     def handle_endtag(self, tag):

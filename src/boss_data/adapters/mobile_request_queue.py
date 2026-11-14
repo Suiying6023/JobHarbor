@@ -1,4 +1,4 @@
-"""Serialize mobile requests and pace their starts across Worker processes."""
+"""Serialize mobile requests and enforce a shared start interval."""
 from contextlib import closing, contextmanager
 from datetime import datetime
 import json

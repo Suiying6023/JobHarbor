@@ -1,6 +1,6 @@
 # 来源数据库
 
-工具自己维护来源 SQLite，消费应用只读岗位事实。内部 owner 为 `JobMarketRadar`，数据合同为 `job-source/1`，与本地品牌 JobHarbor 分开。
+JobHarbor 使用 SQLite 保存岗位事实，提供 `job-source/1` 数据合同。
 
 ## 当前事实与历史
 
@@ -16,8 +16,6 @@
 | `list_observations` | 来源列表历史 |
 | `source_changes`、`consumer_cursors` | 增量变化序列及明确确认的消费位置 |
 
-模型标签、个人画像、评审、备注和沟通记录归消费应用。源库内部表不承载这些分析业务。
-
 ## 身份与时间
 
 身份为命名空间加稳定原站 ID。BOSS 公开岗位 ID 是 canonical，移动数字 jobId 是别名；分享路径、请求 ID、已有映射各自核对。相同公司和正文的不同岗位保留独立身份与时间。
@@ -30,11 +28,11 @@
 
 ## 招聘者字段
 
-0.4.1移动归一优先将数字 bossId 写入 `metadata.recruiter_id`，原始 bossId 同时保留。全部行为标签进入 `metadata.recruiter_behavior_labels`。
+移动端数字 bossId 写入 `metadata.recruiter_id`，原始 bossId 同时保留。全部行为标签进入 `metadata.recruiter_behavior_labels`。
 
 “今日回复N次”（N>0）归为“今日活跃/0天”，分钟或小时前回复提供相应近期活动；“回复率高”仅保留标签。旧记录按原值读取，重取或明确重放使用新版归一。
 
-发布时间文案和其观察时间一起保存，可靠绝对日期缺失时保持未知。7天、15天、薪资和个人适配由消费应用结合来源时间判断。
+发布时间文案和其观察时间一起保存，可靠绝对日期缺失时保持未知。
 
 ## 读取、迁移与消费
 

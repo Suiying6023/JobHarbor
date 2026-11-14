@@ -1,4 +1,4 @@
-"""BOSS source data, independent of any job-analysis product."""
+"""JobHarbor job data collection and storage."""
 
 __version__ = "0.4.1"
 

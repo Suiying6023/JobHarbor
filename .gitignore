@@ -17,6 +17,7 @@ cookies*.json
 .browser-profile/
 browser-profile*/
 outputs/
+/AGENTS.md
 .bosscli/
 private/
 data/

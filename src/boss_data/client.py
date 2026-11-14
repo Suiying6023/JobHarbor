@@ -1,4 +1,4 @@
-"""Python/Agent facade for bounded source-data work, without a dialogue dependency."""
+"""Python API for source collection and refresh tasks."""
 from __future__ import annotations
 
 import asyncio
@@ -35,7 +35,7 @@ def mobile_outcome(metadata, response):
     codes = [response.get("code"), *[s.get("code") for s in subs]]
     messages = " | ".join(str(m) for m in [response.get("message"), *[s.get("message") for s in subs]] if m)
     # App HttpResponse: 7/31/32 are login-state failures, 35/36 verification.
-    # Code 37 needs its endpoint/message context; it is not a universal token verdict.
+    # Code 37 is classified using the response message.
     if any(code in (7, 31, 32) for code in codes) or re.search(r"未登录|请.{0,2}登录|登录.*(?:失效|过期|超时)|(?:token|t2).*expired|not.?logged.?in|鉴权失败|认证失败", messages, re.I):
         return "login_expired"
     if any(code in (35, 36) for code in codes):
@@ -156,7 +156,6 @@ class BossCli:
                     raise ValueError("Stored source detail context maps to a different canonical job")
                 request = stored["request"]
         if not request["securityId"] and mobile_id and self.settings.mobile.get("session_file"):
-            # An explicit private data path is a migration input, not an old-source-code import.
             saved = Path(self.settings.mobile["session_file"]).parent / "detail-contexts" / (str(mobile_id) + ".local.json")
             if saved.exists():
                 context = json.loads(saved.read_text(encoding="utf-8-sig"))

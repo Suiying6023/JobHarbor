@@ -60,7 +60,7 @@ FETCH_JOB_JS = _FETCH_JOB_JS_TEMPLATE.replace("__FETCH_TIMEOUT_MS__", "30000")
 
 @dataclass(slots=True)
 class JobStatus:
-    """一条岗位的观测结果。`state` 是唯一判据，其余都是证据。"""
+    """Job status and the page evidence supporting it."""
 
     state: str                      # open | closed | gone | challenged | unknown
     h1: str | None = None
@@ -70,7 +70,6 @@ class JobStatus:
     length: int = 0
     url: str = ""
     reason: str = ""
-    # 这一条是不是**自愈后**才拿到的（撞过 verify 页，导航一次后恢复）。
     recovered: bool = False
     raw: dict = field(default_factory=dict)
 
@@ -85,7 +84,7 @@ class JobStatus:
 
     @property
     def invalid(self) -> bool | None:
-        """落库用的三态：True=失效，False=有效，None=未知（**不改库**）。"""
+        """Return True for invalid, False for open, and None for unknown."""
         if self.state in ("closed", "gone"):
             return True
         if self.state == "open":
@@ -94,11 +93,7 @@ class JobStatus:
 
 
 def parse_job_page(html: str) -> dict:
-    """从岗位页 HTML 里取容器。纯函数。
-
-    找不到 `.info-primary .name h1` 时退回 `.job-banner h1`：平台改过一次结构，
-    两份选择器都在实测里出现过，留一条退路比在判定处猜更便宜。
-    """
+    """Extract title, status, activity, and access prompts from job-page HTML."""
     got = query(html, PAGE_SELECTORS)
     h1 = got["h1"]["text"] or got["h1_fallback"]["text"]
     notice = got["notice"]["text"] or ""
@@ -116,10 +111,7 @@ def parse_job_page(html: str) -> dict:
 
 
 def read_job_page(fetched: dict) -> dict:
-    """把 `FETCH_JOB_JS` 的返回变成 `classify` 吃的证据。纯函数。
-
-    短页面的三种形态在这里分开（下架 / 挑战 / 验证），因为它们的处置完全相反。
-    """
+    """Convert a fetched document into status and access evidence."""
     if not fetched:
         return {"ok": False, "reason": "fetch_error", "error": "空返回"}
     if fetched.get("error") or fetched.get("reason") == "fetch_error":
@@ -132,8 +124,6 @@ def read_job_page(fetched: dict) -> dict:
     final_url = fetched.get("url") or ""
     path = urlsplit(final_url).path
     length = len(text)
-    # `text` 一路带着：落库前由 `evidence_for_store` 换成摘要。
-    # 摘要有用——同一份内容重复出现（平台给推荐页、缓存页）能一眼看出来。
     evidence: dict = {"status": status, "url": final_url, "len": length, "text": text}
 
     # Access signals apply to short error documents as well as full job pages.
@@ -164,9 +154,6 @@ def read_job_page(fetched: dict) -> dict:
         return {**evidence, "ok": False, "reason": "short"}
 
     evidence["ok"] = True
-    # `gone` / `challenged` 两个布尔是给 `service_jobs.status_verdict` 用的：
-    # 它按旧证据契约判（`evidence["gone"]`），而旧取值脚本**从来没给过**这个键，
-    # 于是下架岗位在任务链路里一直被记成「判不出来」。这里一次补齐。
     evidence["challenged"] = bool(
         evidence.get("captcha_present") or evidence.get("restriction_notice")
         or status in (401, 403, 429))
@@ -174,15 +161,11 @@ def read_job_page(fetched: dict) -> dict:
 
 
 def classify(evidence: dict, *, title: str | None = None) -> JobStatus:
-    """把取值结果判成状态。纯函数，不碰网络。
-
-    ⚠️ 判据是 `.job-status` 的**值**，不是节点空不空：在招是「招聘中」/「最新」，
-    关闭是「职位已关闭」。按"有文本即关闭"判会把全部岗位判成关闭。
-    """
+    """Classify access signals, job identity, and the job-status text."""
     if not evidence:
         return JobStatus(state="unknown", reason="空证据")
 
-    # These signals have priority even when a caller supplies a legacy reason.
+    # Access restrictions take precedence over job-status text.
     if evidence.get("status") in (401, 403, 429) or evidence.get("restriction_notice"):
         return JobStatus(state="challenged", reason="访问限制提示",
                          http_status=evidence.get("status"), length=evidence.get("len") or 0,
@@ -222,8 +205,7 @@ def classify(evidence: dict, *, title: str | None = None) -> JobStatus:
         return JobStatus(state="challenged", reason="限制提示文案", http_status=status)
 
     h1 = evidence.get("h1")
-    # 身份校验：拿回来的必须是我们请求的那条岗位，否则判定会张冠李戴，
-    # 而降级是单向的（误判关闭不可逆）。
+    # A mismatched title leaves the requested job's status unknown.
     if title and h1 and not same_job(h1, title):
         return JobStatus(state="unknown", reason=f"身份不符: {h1[:20]}",
                          h1=h1, http_status=status, length=evidence.get("len") or 0)
@@ -239,12 +221,11 @@ def classify(evidence: dict, *, title: str | None = None) -> JobStatus:
         return JobStatus(state="closed", **common)
     if any(value in job_status for value in OPEN_VALUES):
         return JobStatus(state="open", **common)
-    # 平台加了新文案：不猜。猜错要么白刷一轮（便宜），要么误降一个在招岗位（不可逆）。
     return JobStatus(state="unknown", reason=f"未知状态文案: {job_status[:20]}", **common)
 
 
 def same_job(h1: str | None, db_title: str | None) -> bool:
-    """比较前 8 字：标题常有全角括号与后缀差异，全等太脆。"""
+    """Compare the first eight characters after normalizing title whitespace."""
     left = " ".join((h1 or "").split())
     right = " ".join((db_title or "").split())
     if not left or not right:
