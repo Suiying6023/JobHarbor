@@ -1,125 +1,32 @@
-# Python
 .venv/
-venv/
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
 .pytest_cache/
 .ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
 *.egg-info/
 build/
 dist/
-
-# Browser profiles (may contain login session / cookies)
+*.local.*
+*.private.*
+session.json
+cookies*.json
 .browser-profile/
-browsers/
-
-# Collected data and outputs (数据库含采集数据/招聘者信息，一律不提交)
-data/*.sqlite3
-data/*.sqlite3-wal
-data/*.sqlite3-shm
-**/data/*.sqlite3.bak*
-data/raw/
-output/
-
-# prompt 回归样本集：含真实公司名与 JD 正文摘录，与数据库同属采集数据。
-# 留在本地可复跑，但不入库（这个仓库有「不进公开仓」的约定）。
-data/eval/
-
-# 2026-08-30 成本/判据标定的产物：含真实公司名、JD 正文与整页 HTML
-# （`sample_job.html` 是一条完整岗位页）。结论已写进记忆与代码注释，
-# 原始件留本地复核用。
-# `*.jsonl` 里是逐条抓取记录（岗位 ID、标题、请求计数），不是纯数字，同样不入库。
-data/calibration/*.json
-data/calibration/*.html
-data/calibration/*.css
-data/calibration/*.jsonl
-# security.js 是平台自己的挑战脚本（324KB，无个人数据），
-# 但它是**平台资产**且随版本变化，取证结论已进记忆，不入库。
-data/calibration/*.js
-
-# 探针/调试产物（cookie、token、DOM dump 等，不进仓库）
-data/manual_listen/
-data/token_probe/
-data/vue_probe/
-data/network_probe/
-data/recommend_probe/
-data/risk_dumps/
-data/filter_codes.json
-data/*.log
-
-# Secrets
-.env
-*.local.yaml
-config.local.yaml
-
-# Resume source material (personal data)
-resumes/private/
-
-# Private planning notes, not for the public repo
-ROADMAP.md
-
-# Probe/scratch logs
-data/*.log
-
-# Local run logs / probe artifacts
-# logs/ 里是采集运行日志，含公司名与岗位标题，和 data/ 同级敏感
-logs/
-**/data/*.log
-**/data/probe/
-data/*.sqlite3.bak
-data/targets_*.json
-
-# 风控响应正文可能含账号相关信息，不入库不上传
-data/risk_dumps/
-.browser-profile-reg/
-.browser-refresh/
-*.service.lock
-
-# Local run variants and probe pools (machine-specific, not for the public repo)
-config.aggressive.yaml
-config.cities3.yaml
-config.steady.yaml
-config.trial.yaml
-config.smoke.yaml
-proxies.*.txt
-HANDOFF.md
-job-market-radar-v*/
-
-# Local analysis, preferences, state and pending data batches
-batch_*.json
-config.national.yaml
-open_login.bat
-.config-history/
-*.local.yaml.lock
-*.tmp
-data/*-state.sqlite3*
-data/access-policy.json*
-data/refresh-access-policy.json*
-data/*.lock
-work/
-resumes/
-demo/
-data/**/*.sqlite3*
-data/**/*.manifest.json
-
-# Local archives, handoffs, private research and organization records
-local/
-data/batches/
-
-# SQLite data remains local regardless of configured location
+browser-profile*/
+outputs/
+.bosscli/
+private/
+data/
+exports/
+*.sqlite
 *.sqlite3
-*.sqlite3-wal
-*.sqlite3-shm
+*.sqlite3-*
 *.db
-*.db-wal
-*.db-shm
-/.browser-interface-anonymous/
-
-# 浏览器 profile 一律不入库：里面是登录态（Network/Cookies、Login Data、Local State）
-# 和抓取过程中的缓存。按前缀兜底，避免新增 profile 目录时漏掉。
-# 不加尾部 `/`：profile 目录可能尚不存在，git 对不存在的路径判不出是不是目录。
-/.browser-profile*
-# 打标/采集的逐条日志（含岗位标题、canonical_id、LLM 原始回答）—— 与数据库同属
-# 采集数据，不入库。2026-10-19 发现 relabel-log.jsonl 被误提交过一次。
-data/*.jsonl
+*.db-*
+*.jsonl
+*.log
+.env
+.env.*
