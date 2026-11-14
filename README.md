@@ -1,4 +1,4 @@
-# 职港 · JobHarbor
+# JobHarbor
 
 BOSS 岗位数据工具，提供 CLI 和 Python API。
 
@@ -17,6 +17,6 @@ Copy-Item config.example.yaml config.local.yaml
 .venv\Scripts\boss-data.exe --config config.local.yaml doctor
 ```
 
-移动端功能需按[凭据配置](docs/authentication.md)填写自己的有效会话。运行数据放在 `private/`，该目录不入 Git。
+移动端功能需按[凭据配置](docs/authentication.md)填写自己的有效会话。
 
 [使用说明](docs/usage.md)
